@@ -1,3 +1,0 @@
-import second
-
-print("First!")
