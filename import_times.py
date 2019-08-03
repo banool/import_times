@@ -40,7 +40,6 @@ def _timer(module_name):
 
 
 def _get_new_loader(f):
-
     def new(loader, module, *args, **kwargs):
         with _timer(module.__name__):
             out = f(loader, module, *args, **kwargs)
