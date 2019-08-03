@@ -1,6 +1,13 @@
+loader_modules = []
 import importlib.util as iu
+loader_modules.append(iu)
 import importlib._bootstrap as ib
-import importlib._bootstrap_external as ibe
+loader_modules.append(ib)
+try:
+    import importlib._bootstrap_external as ibe
+    loader_modules.append(ibe)
+except ImportError:
+    pass
 
 from contextlib import contextmanager
 import inspect
@@ -51,7 +58,7 @@ def _get_new_loader(f):
 def enable_import_times():
     print("import time: self [us] | cumulative | imported package", file=sys.stderr)
     loaders = set()
-    for module in [iu, ib, ibe]:
+    for module in loader_modules:
         loaders.update([i[1] for i in inspect.getmembers(module, inspect.isclass)])
 
     for l in loaders:
