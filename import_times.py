@@ -17,7 +17,7 @@ import time
 
 _done = set()
 _import_level = 0
-_accumulated = 0
+_accumulated = []
 
 
 @contextmanager
@@ -30,7 +30,7 @@ def _timer(module_name):
         return
     _done.add(module_name)
     _import_level += 1
-    _accumulated = 0
+    _accumulated.append(0)
     start = time.time()
     yield
     end = time.time()
@@ -39,17 +39,22 @@ def _timer(module_name):
     indentation = " " * _import_level * 2
     print(
         "import time: {:9d} | {:10d} | {}{}".format(
-            total - _accumulated, total, indentation, module_name
+            total - _accumulated[-1], total, indentation, module_name
         ),
         file=sys.stderr,
     )
-    _accumulated += total
+    _accumulated.pop()
+    if _accumulated:
+        _accumulated[-1] += total
 
 
 def _get_new_loader(f):
-    def new(loader, module, *args, **kwargs):
-        with _timer(module.__name__):
-            out = f(loader, module, *args, **kwargs)
+    def new(loader, *args, **kwargs):
+        module = "__unknown__"
+        if len(args):
+            module = args[0].__name__
+        with _timer(module):
+            out = f(loader, *args, **kwargs)
         return out
 
     return new
