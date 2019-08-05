@@ -54,7 +54,13 @@ def _get_new_loader(f):
         if len(args):
             module = args[0].__name__
         with _timer(module):
-            out = f(loader, *args, **kwargs)
+            global _import_level
+            try:
+                out = f(loader, *args, **kwargs)
+            except:
+                _import_level -= 1
+                raise
+
         return out
 
     return new
